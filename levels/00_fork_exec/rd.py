@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 """Docker From Scratch Workshop - Level 0: Starting a new process.
 
 Goal: We want to start a new linux process using the fork & exec model.
@@ -31,6 +31,7 @@ def contain(command):
     # NOTE: command is an array (the first element is path/file, and the entire
     #       array is exec's args)
 
+    os.execv(command[0], command)
     os._exit(0)  # TODO: remove this after adding exec
 
 
@@ -39,7 +40,8 @@ def contain(command):
 def run(command):
     # TODO: replace this with fork()
     #       (https://docs.python.org/2/library/os.html#os.fork)
-    pid = 0
+    #pid = 0
+    pid = os.fork()
     if pid == 0:
         # This is the child, we'll try to do some containment here
         try:
