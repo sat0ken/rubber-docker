@@ -73,19 +73,19 @@ def cli():
 
 def contain(command, image_name, image_dir, container_id, container_dir):
     # TODO: would you like to do something before chrooting?
-    # print('Created a new root fs for our container: {}'.format(new_root))
-
+    new_root = create_container_root(image_name, image_dir, container_id, container_dir)
+    print('Created a new root fs for our container: {}'.format(new_root))
     # TODO: chroot into new_root
+    os.chroot(new_root)
     # TODO: something after chrooting? (HINT: try running: sudo python rd.py run -i ubuntu -- /bin/sh)
-
     os.execvp(command[0], command)
-
+    #os._exit(0)
 
 @cli.command(context_settings=dict(ignore_unknown_options=True,))
 @click.option('--image-name', '-i', help='Image name', default='ubuntu')
-@click.option('--image-dir', help='Images directory',
+@click.option('--image-dir', '-image-dir', help='Images directory',
               default='/workshop/images')
-@click.option('--container-dir', help='Containers directory',
+@click.option('--container-dir', '-fs-dir', help='Containers directory',
               default='/workshop/containers')
 @click.argument('Command', required=True, nargs=-1)
 def run(image_name, image_dir, container_dir, command):
