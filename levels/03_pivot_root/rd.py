@@ -41,7 +41,7 @@ def create_container_root(image_name, image_dir, container_id, container_dir):
         os.makedirs(container_root)
 
     # TODO: uncomment (why?)
-    # linux.mount('tmpfs', container_root, 'tmpfs', 0, None)
+    linux.mount('tmpfs', container_root, 'tmpfs', 0, None)
 
     with tarfile.open(image_path) as t:
         # Fun fact: tar files may contain *nix devices! *facepalm*
@@ -102,21 +102,24 @@ def contain(command, image_name, image_dir, container_id, container_dir):
 
     makedev(os.path.join(new_root, 'dev'))
 
-    os.chroot(new_root)  # TODO: replace with pivot_root
+    #os.chroot(new_root)  # TODO: replace with pivot_root
+    old_root = os.path.join(new_root, 'old_root')
+    os.mkdir(old_root)
+    linux.pivot_root(new_root, old_root)
 
     os.chdir('/')
 
     # TODO: umount2 old root (HINT: see MNT_DETACH in man 2 umount)
-
+    linux.umount2("/old_root", linux.MNT_DETACH)
     os.execvp(command[0], command)
 
 
 @cli.command(context_settings=dict(ignore_unknown_options=True,))
 @click.option('--image-name', '-i', help='Image name', default='ubuntu')
 @click.option('--image-dir', help='Images directory',
-              default='/workshop/images')
+              default='./images')
 @click.option('--container-dir', help='Containers directory',
-              default='/workshop/containers')
+              default='./containers')
 @click.argument('Command', required=True, nargs=-1)
 def run(image_name, image_dir, container_dir, command):
     container_id = str(uuid.uuid4())

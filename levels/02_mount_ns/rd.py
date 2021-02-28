@@ -63,10 +63,12 @@ def contain(command, image_name, image_dir, container_id, container_dir):
     #           just for you!
     #   HINT 2: the linux module includes both functions and constants!
     #           e.g. linux.CLONE_NEWNS
+    linux.unshare(linux.CLONE_NEWNS)
 
     # TODO: remember shared subtrees?
     # (https://www.kernel.org/doc/Documentation/filesystems/sharedsubtree.txt)
     # Make / a private mount to avoid littering our host mount table.
+    linux.mount('/', os.path.join(new_root, '/'), 'proc', linux.MS_PRIVATE, '')
 
     # Create mounts (/proc, /sys, /dev) under new_root
     linux.mount('proc', os.path.join(new_root, 'proc'), 'proc', 0, '')
