@@ -135,7 +135,7 @@ def run(image_name, image_dir, container_dir, command):
     #       the children of a process (because we can't change the PID of a
     #       running process), so we'll have to unshare here OR replace
     #       os.fork() with linux.clone()
-
+    linux.unshare(linux.CLONE_NEWPID)
     pid = os.fork()
     if pid == 0:
         # This is the child, we'll try to do some containment here
