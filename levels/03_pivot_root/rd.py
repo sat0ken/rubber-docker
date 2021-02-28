@@ -111,6 +111,7 @@ def contain(command, image_name, image_dir, container_id, container_dir):
 
     # TODO: umount2 old root (HINT: see MNT_DETACH in man 2 umount)
     linux.umount2("/old_root", linux.MNT_DETACH)
+    os.rmdir('/old_root')  # rmdir the old_root dir
     os.execvp(command[0], command)
 
 

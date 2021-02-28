@@ -154,9 +154,9 @@ def contain(command, image_name, image_dir, container_id, container_dir,
 @click.option('--cpu-shares', help='CPU shares (relative weight)', default=0)
 @click.option('--image-name', '-i', help='Image name', default='ubuntu')
 @click.option('--image-dir', help='Images directory',
-              default='/workshop/images')
+              default='./images')
 @click.option('--container-dir', help='Containers directory',
-              default='/workshop/containers')
+              default='./containers')
 @click.argument('Command', required=True, nargs=-1)
 def run(memory, memory_swap, cpu_shares, image_name, image_dir, container_dir,
         command):
