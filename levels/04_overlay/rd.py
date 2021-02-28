@@ -32,27 +32,42 @@ def _get_container_path(container_id, container_dir, *subdir_names):
 
 def create_container_root(image_name, image_dir, container_id, container_dir):
     image_path = _get_image_path(image_name, image_dir)
+    image_root = os.path.join(image_dir, image_name, 'rootfs')
+
     assert os.path.exists(image_path), "unable to locate image %s" % image_name
 
     # TODO: Instead of creating the container_root and extracting to it,
     #       create an images_root.
     # keep only one rootfs per image and re-use it
-    container_root = _get_container_path(container_id, container_dir, 'rootfs')
+    #container_root = _get_container_path(container_id, container_dir, 'rootfs')
 
-    if not os.path.exists(container_root):
-        os.makedirs(container_root)
+    if not os.path.exists(image_root):
+        os.makedirs(image_root)
         with tarfile.open(image_path) as t:
             # Fun fact: tar files may contain *nix devices! *facepalm*
             members = [m for m in t.getmembers()
                        if m.type not in (tarfile.CHRTYPE, tarfile.BLKTYPE)]
-            t.extractall(container_root, members=members)
+            t.extractall(image_root, members=members)
 
     # TODO: create directories for copy-on-write (uppperdir), overlay workdir,
     #       and a mount point
+    container_cow_rw        = _get_container_path(container_id, container_dir, 'cow_rw')
+    container_cow_workdir   = _get_container_path(container_id, container_dir, 'cow_workdir')
+    container_rootfs        = _get_container_path(container_id, container_dir, 'rootfs')
+
+    for d in (container_cow_rw, container_cow_workdir, container_rootfs):
+        if not os.path.exists(d):
+            os.makedirs(d)
 
     # TODO: mount the overlay (HINT: use the MS_NODEV flag to mount)
+    linux.mount(
+        'overlay', container_rootfs, 'overlay', linux.MS_NODEV,
+        "lowerdir={image_root},upperdir={cow_rw},workdir={cow_workdir}".format(
+            image_root=image_root,
+            cow_rw=container_cow_rw,
+            cow_workdir=container_cow_workdir))
 
-    return container_root  # return the mountpoint for the mounted overlayfs
+    return container_rootfs  # return the mountpoint for the mounted overlayfs
 
 
 @click.group()
